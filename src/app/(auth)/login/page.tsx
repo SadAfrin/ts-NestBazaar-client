@@ -132,7 +132,7 @@ export default function LoginPage() {
 
         <Button
           type="submit"
-          isLoading={loading}
+          {...({ isLoading: loading } as any)}
           className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-green-100 hover:shadow-xl hover:scale-[1.01] transition-all duration-200 mt-2"
         >
           {loading ? "Logging in..." : "Login"}

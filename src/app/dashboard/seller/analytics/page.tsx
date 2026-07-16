@@ -27,28 +27,36 @@ interface OrderStatusData {
   color: string;
 }
 
+const [isMounted, setIsMounted] = useState(false);
+
+useEffect(() => {
+  setIsMounted(true);
+}, []);
+
+if (!isMounted) return null;
+
 // Fake data for charts (will be replaced with real data after orders are built)
 const monthlySales: MonthlySalesData[] = [
-  { month: \"Jan\", sales: 4, revenue: 120000 },
-  { month: \"Feb\", sales: 6, revenue: 185000 },
-  { month: \"Mar\", sales: 3, revenue: 95000 },
-  { month: \"Apr\", sales: 8, revenue: 240000 },
-  { month: \"May\", sales: 5, revenue: 155000 },
-  { month: \"Jun\", sales: 10, revenue: 310000 },
+  { month: "Jan", sales: 4, revenue: 120000 },
+  { month: "Feb", sales: 6, revenue: 185000 },
+  { month: "Mar", sales: 3, revenue: 95000 },
+  { month: "Apr", sales: 8, revenue: 240000 },
+  { month: "May", sales: 5, revenue: 155000 },
+  { month: "Jun", sales: 10, revenue: 310000 },
 ];
 
 const topProducts: TopProductData[] = [
-  { name: \"iPhone 14 Pro\", sales: 5 },
-  { name: \"Sony Headphones\", sales: 3 },
-  { name: \"Samsung S23\", sales: 4 },
-  { name: \"MacBook Air\", sales: 2 },
+  { name: "iPhone 14 Pro", sales: 5 },
+  { name: "Sony Headphones", sales: 3 },
+  { name: "Samsung S23", sales: 4 },
+  { name: "MacBook Air", sales: 2 },
 ];
 
 const orderStatusData: OrderStatusData[] = [
-  { name: \"Delivered\", value: 65, color: \"#10b981\" },
-  { name: \"Processing\", value: 20, color: \"#a855f7\" },
-  { name: \"Pending\", value: 10, color: \"#eab308\" },
-  { name: \"Cancelled\", value: 5, color: \"#ef4444\" },
+  { name: "Delivered", value: 65, color: "#10b981" },
+  { name: "Processing", value: 20, color: "#a855f7" },
+  { name: "Pending", value: 10, color: "#eab308" },
+  { name: "Cancelled", value: 5, color: "#ef4444" },
 ];
 
 export default function SellerAnalyticsPage(): JSX.Element {
@@ -83,10 +91,10 @@ export default function SellerAnalyticsPage(): JSX.Element {
       {/* Top Cards Statistics Summary Matrix */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { title: \"Total Revenue\", value: \"৳1,105,000\", desc: \"+18.4% from last month\", icon: <FaDollarSign className="text-green-600" size={16} />, bg: \"bg-green-50\" },
-          { title: \"Products Sold\", value: \"36 Items\", desc: \"Across 4 categories\", icon: <FaBoxOpen className="text-blue-600" size={16} />, bg: \"bg-blue-50\" },
-          { title: \"Success Rate\", value: \"94.2%\", desc: \"Fulfillment standard logs\", icon: <FaCheckCircle className="text-purple-600" size={16} />, bg: \"bg-purple-50\" },
-          { title: \"Pending Orders\", value: \"3 Pipeline\", desc: \"Requires immediate package dispatch\", icon: <FaClock className="text-yellow-600" size={16} />, bg: \"bg-yellow-50\" },
+          { title: "Total Revenue", value: "৳1,105,000", desc: "+18.4% from last month", icon: <FaDollarSign className="text-green-600" size={16} />, bg: "bg-green-50" },
+          { title: "Products Sold", value: "36 Items", desc: "Across 4 categories", icon: <FaBoxOpen className="text-blue-600" size={16} />, bg: "bg-blue-50" },
+          { title: "Success Rate", value: "94.2%", desc: "Fulfillment standard logs", icon: <FaCheckCircle className="text-purple-600" size={16} />, bg: "bg-purple-50" },
+          { title: "Pending Orders", value: "3 Pipeline", desc: "Requires immediate package dispatch", icon: <FaClock className="text-yellow-600" size={16} />, bg: "bg-yellow-50" },
         ].map((card, i) => (
           <motion.div
             key={i}

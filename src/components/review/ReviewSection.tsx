@@ -105,7 +105,7 @@ export default function ReviewSection({ productId }: ReviewSectionProps): JSX.El
       if (data.success) setReviews(data.data);
     } catch (error) {
       console.error(error);
-    } finaly {
+    } finally {
       setLoading(false);
     }
   };
@@ -272,7 +272,7 @@ export default function ReviewSection({ productId }: ReviewSectionProps): JSX.El
 
                 <Button
                   type="submit"
-                  isLoading={submitting}
+                  {...({ isLoading: submitting } as any)}
                   disabled={submitting}
                   className="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-green-200 w-full py-3"
                 >

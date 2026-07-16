@@ -188,7 +188,7 @@ export default function RegisterPage() {
 
         <Button
           type="submit"
-          isLoading={loading}
+          {...({ isLoading: loading } as any)}
           className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl shadow-lg"
         >
           Create Account

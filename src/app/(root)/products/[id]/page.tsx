@@ -80,7 +80,7 @@ export default function ProductDetailsPage({ params }: PageProps): JSX.Element {
         }
       } catch (error) {
         console.error("Failed to fetch product target profile:", error);
-      } finaly {
+      } finally {
         setLoading(false);
       }
     };
