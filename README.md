@@ -106,21 +106,5 @@ NEXT_PUBLIC_SERVER_URL=
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 STRIPE_SECRET_KEY=
 NEXT_PUBLIC_SUPER_ADMIN_EMAIL=admin@admin.com
-```
 
 ---
-
-## Run Locally
-
-```bash
-git clone https://github.com/SadAfrin/NestBazaar-client.git
-cd NestBazaar-client
-npm install
-npm run dev
-```
-
----
-
-## Developer
-
-**Sadia Afrin** — PH-L1 | Assignment 10

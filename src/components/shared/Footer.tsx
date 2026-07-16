@@ -1,3 +1,5 @@
+"use client";
+
 import { JSX } from "react";
 import Link from "next/link";
 import { FaFacebookF, FaInstagram, FaLinkedinIn } from "react-icons/fa";
@@ -44,10 +46,9 @@ const socialLinks: SocialLink[] = [
   { icon: <FaLinkedinIn size={14} />, href: "#", label: "LinkedIn" },
 ];
 
-export function Footer(): JSX.Element {
+export default function Footer(): JSX.Element {
   return (
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-300">
-
       <div className="w-full overflow-hidden leading-none">
         <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" className="fill-emerald-50">
           <path d="M0,30 C360,60 1080,0 1440,30 L1440,0 L0,0 Z" />
@@ -56,7 +57,6 @@ export function Footer(): JSX.Element {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-
           <div className="space-y-4">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg">
@@ -135,7 +135,6 @@ export function Footer(): JSX.Element {
               </li>
             </ul>
           </div>
-
         </div>
       </div>
 
@@ -149,7 +148,6 @@ export function Footer(): JSX.Element {
           </p>
         </div>
       </div>
-
     </footer>
   );
 }

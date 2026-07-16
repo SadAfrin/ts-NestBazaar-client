@@ -1,23 +1,14 @@
 "use client";
 
-import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signUp, useSession } from "@/lib/auth-client";
-import { 
-  FaUser, 
-  FaEnvelope, 
-  FaLock, 
-  FaEye, 
-  FaEyeSlash, 
-  FaGoogle 
-} from "react-icons/fa";
+import { signUp, signIn } from "@/lib/auth-client";
+import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
 import { MdLocationOn } from "react-icons/md";
 import { Button } from "@heroui/react";
 import { toast } from "react-toastify";
-import RoleSelectionModal from "@/components/shared/RoleSelectionModal";
 
-// Password Condition Interface
 interface PasswordCondition {
   label: string;
   test: (p: string) => boolean;
@@ -25,101 +16,84 @@ interface PasswordCondition {
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { data: session } = useSession();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [googleLoading, setGoogleLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const [showRoleModal, setShowRoleModal] = useState<boolean>(false);
-  const [isEmailRegistering, setIsEmailRegistering] = useState<boolean>(false);
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     location: "",
-    role: "buyer", // default role
+    role: "buyer",
   });
 
   const passwordConditions: PasswordCondition[] = [
-    { label: "At least 8 characters", test: (p: string) => p.length >= 8 },
-    { label: "One uppercase letter (A-Z)", test: (p: string) => /[A-Z]/.test(p) },
-    { label: "One lowercase letter (a-z)", test: (p: string) => /[a-z]/.test(p) },
-    { label: "One number (0-9)", test: (p: string) => /[0-9]/.test(p) },
-    { label: "One special character (@, $, !, etc.)", test: (p: string) => /[^A-Za-z0-9]/.test(p) },
+    { label: "At least 8 characters", test: (p) => p.length >= 8 },
+    { label: "One uppercase letter", test: (p) => /[A-Z]/.test(p) },
+    { label: "One lowercase letter", test: (p) => /[a-z]/.test(p) },
+    { label: "One number", test: (p) => /[0-9]/.test(p) },
+    { label: "One special character", test: (p) => /[^A-Za-z0-9]/.test(p) },
   ];
 
-  useEffect(() => {
-    if (session) {
-      router.push("/dashboard");
-    }
-  }, [session, router]);
-
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleRegisterSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
 
-    // Validate all password conditions strictly
-    const isPasswordValid = passwordConditions.every((condition) => condition.test(formData.password));
-    if (!isPasswordValid) {
-      setError("Please meet all password validation criteria.");
+    if (!passwordConditions.every((c) => c.test(formData.password))) {
+      setError("Please meet all password requirements.");
       return;
     }
 
     setLoading(true);
-    setIsEmailRegistering(true);
-
     try {
       await signUp.email({
         email: formData.email,
         password: formData.password,
         name: formData.name,
-        callbackURL: "/dashboard",
         fetchOptions: {
           onSuccess: async () => {
-            // Save custom role details via internal api layer
             await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/setup`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                email: formData.email,
-                role: formData.role,
-                location: formData.location,
-              }),
+              body: JSON.stringify({ email: formData.email, role: formData.role, location: formData.location }),
             });
-
-            toast.success("Account successfully created!");
+            toast.success("Account created!");
             router.push("/dashboard");
-            router.refresh();
           },
-          onError: (ctx) => {
-            setError(ctx.error.message || "Registration failed. Please try again.");
-            toast.error(ctx.error.message || "An error occurred.");
-          },
+          onError: (ctx) => setError(ctx.error.message || "Registration failed."),
         },
       });
     } catch (err: any) {
-      setError(err.message || "An unexpected error occurred.");
+      setError(err.message || "Unexpected error.");
     } finally {
       setLoading(false);
-      setIsEmailRegistering(false);
     }
   };
 
-  const handleGoogleSignUp = () => {
-    setShowRoleModal(true);
+  const handleGoogleSignUp = async () => {
+    setGoogleLoading(true);
+    try {
+      await signIn.social({
+        provider: "google",
+        callbackURL: "/dashboard",
+        newUserCallbackURL: "/complete-profile",
+        errorCallbackURL: "/register?error=google_auth_failed",
+      });
+    } catch (err: any) {
+      toast.error(err.message || "Google sign up failed.");
+      setGoogleLoading(false);
+    }
   };
 
   return (
     <div className="w-full max-w-md p-8 bg-white border border-gray-100 rounded-3xl shadow-sm my-8">
-      <div>
-        <h2 className="text-3xl font-black text-gray-800 text-center">Create Account</h2>
-        <p className="text-sm text-gray-400 text-center mt-1">Join NestBazaar second-hand platform</p>
-      </div>
+      <h2 className="text-3xl font-black text-gray-800 text-center">Create Account</h2>
 
       {error && (
         <div className="mt-4 p-3 bg-red-50 border border-red-100 text-red-600 text-xs font-semibold rounded-xl text-center">
@@ -128,7 +102,6 @@ export default function RegisterPage() {
       )}
 
       <form onSubmit={handleRegisterSubmit} className="mt-6 space-y-4">
-        {/* Name Field */}
         <div>
           <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Full Name</label>
           <div className="relative">
@@ -145,7 +118,6 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Email Field */}
         <div>
           <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Email Address</label>
           <div className="relative">
@@ -162,7 +134,6 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Location Field */}
         <div>
           <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Location</label>
           <div className="relative">
@@ -179,7 +150,6 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Role Selection Dropdown within Form */}
         <div>
           <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Register As</label>
           <select
@@ -188,12 +158,11 @@ export default function RegisterPage() {
             onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
             className="w-full px-4 py-3 bg-gray-50/50 border border-gray-100 focus:border-green-400 rounded-xl text-sm transition-all focus:outline-none text-gray-800 font-medium"
           >
-            <option value="buyer">Buyer (Want to Purchase)</option>
-            <option value="seller">Seller (Want to Sell Items)</option>
+            <option value="buyer">Buyer</option>
+            <option value="seller">Seller</option>
           </select>
         </div>
 
-        {/* Password Field */}
         <div>
           <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Password</label>
           <div className="relative">
@@ -217,58 +186,34 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Password Criteria List Indicators */}
-        <div className="p-3 bg-gray-50 rounded-2xl space-y-1.5 border border-gray-100/50">
-          <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Password Requirements:</p>
-          {passwordConditions.map((condition, idx) => {
-            const passed = condition.test(formData.password);
-            return (
-              <div key={idx} className="flex items-center gap-2 text-xs">
-                <span className={`w-1.5 h-1.5 rounded-full ${passed ? "bg-green-500" : "bg-gray-300"}`} />
-                <span className={passed ? "text-green-600 font-medium" : "text-gray-400"}>
-                  {condition.label}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Submit Button */}
         <Button
           type="submit"
-          disabled={loading}
-          className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-green-100 hover:shadow-xl transition-all"
+          isLoading={loading}
+          className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl shadow-lg"
         >
-          {loading && isEmailRegistering ? "Creating Account..." : "Create Account"}
+          Create Account
         </Button>
       </form>
 
-      {/* Divider */}
       <div className="flex items-center gap-3 my-5">
         <div className="flex-1 h-px bg-gray-200"></div>
         <span className="text-xs text-gray-400 font-medium">OR</span>
         <div className="flex-1 h-px bg-gray-200"></div>
       </div>
 
-      {/* Google Login button */}
       <button
         onClick={handleGoogleSignUp}
-        className="w-full flex items-center justify-center gap-3 py-3 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-green-50 hover:border-green-300 transition-all duration-200"
+        disabled={googleLoading}
+        className="w-full flex items-center justify-center gap-3 py-3 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-green-50 transition-all duration-200 disabled:opacity-60"
       >
         <FaGoogle size={16} className="text-red-500" />
-        Continue with Google
+        {googleLoading ? "Redirecting..." : "Continue with Google"}
       </button>
 
-      {/* Login Navigation Link */}
       <p className="text-center text-sm text-gray-500 mt-6">
         Already have an account?{" "}
-        <Link href="/login" className="text-green-600 font-bold hover:underline">
-          Login
-        </Link>
+        <Link href="/login" className="text-green-600 font-bold hover:underline">Login</Link>
       </p>
-
-      {/* Custom Role Selection Modal for OAuth Flow */}
-      <RoleSelectionModal isOpen={showRoleModal} onClose={() => setShowRoleModal(false)} />
     </div>
   );
 }
